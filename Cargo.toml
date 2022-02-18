@@ -14,3 +14,6 @@ default-members = [
   "lib",
   "lib/cbindings",
 ]
+
+[patch.crates-io]
+ssi = { git = "https://github.com/LedgerDomain/ssi", branch = "with-oci-contexts" }

@@ -336,6 +336,8 @@ fn main() {
     let opt = DIDKit::from_args();
     let ssh_agent_sock;
 
+    env_logger::init();
+
     match opt {
         DIDKit::GenerateEd25519Key => {
             let jwk = JWK::generate_ed25519().unwrap();
