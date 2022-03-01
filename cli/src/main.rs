@@ -338,6 +338,37 @@ fn main() {
 
     env_logger::init();
 
+    // Add the OCI contexts
+    rt.block_on(async {
+        // Pre-downloaded and included in the binary.
+        pub const OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT: &str = "https://open-credentialing-initiative.github.io/oci/contexts/oci-v1.jsonld";
+        pub const OPEN_CREDENTIALING_INITIATIVE_V1: &str = include_str!("../contexts/oci-v1.jsonld");
+
+        // Pre-downloaded and included in the binary.
+        pub const VC_STATUS_2021_LDAP_V1_CONTEXT: &str = "https://spherity.github.io/vc-status-2021-ldap/contexts/vc-status-2021-ldap/v1.jsonld";
+        pub const VC_STATUS_2021_LDAP_V1: &str = include_str!("../contexts/vc-status-2021-ladp-v1.jsonld");
+
+        let mut context_map = ssi::jsonld::CONTEXT_MAP.write().await;
+        context_map.insert(
+            OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT.to_string(),
+            {
+                let jsonld = OPEN_CREDENTIALING_INITIATIVE_V1;
+                let doc = json::parse(jsonld).unwrap();
+                let iri = iref::Iri::new(OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT).unwrap();
+                json_ld::RemoteDocument::new(doc, iri)
+            },
+        );
+        context_map.insert(
+            VC_STATUS_2021_LDAP_V1_CONTEXT.to_string(),
+            {
+                let jsonld = VC_STATUS_2021_LDAP_V1;
+                let doc = json::parse(jsonld).unwrap();
+                let iri = iref::Iri::new(VC_STATUS_2021_LDAP_V1_CONTEXT).unwrap();
+                json_ld::RemoteDocument::new(doc, iri)
+            },
+        );
+    });
+
     match opt {
         DIDKit::GenerateEd25519Key => {
             let jwk = JWK::generate_ed25519().unwrap();
@@ -406,6 +437,7 @@ fn main() {
             proof_options,
         } => {
             let resolver = resolver_options.to_resolver();
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let credential_reader = BufReader::new(stdin());
             let mut credential: VerifiableCredential =
                 serde_json::from_reader(credential_reader).unwrap();
@@ -435,6 +467,7 @@ fn main() {
                             jwk_opt.as_ref(),
                             options,
                             &resolver,
+                            &mut context_loader,
                             ssh_agent_sock_opt,
                         ))
                         .unwrap();
@@ -453,6 +486,7 @@ fn main() {
             resolver_options,
         } => {
             let resolver = resolver_options.to_resolver();
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let mut credential_reader = BufReader::new(stdin());
             let proof_format = proof_options.proof_format.clone();
             let options = LinkedDataProofOptions::from(proof_options);
@@ -464,13 +498,14 @@ fn main() {
                         &jwt,
                         Some(options),
                         &resolver,
+                        &mut context_loader,
                     ))
                 }
                 ProofFormat::LDP => {
                     let credential: VerifiableCredential =
                         serde_json::from_reader(credential_reader).unwrap();
                     credential.validate_unsigned().unwrap();
-                    rt.block_on(credential.verify(Some(options), &resolver))
+                    rt.block_on(credential.verify(Some(options), &resolver, &mut context_loader))
                 }
                 _ => {
                     panic!("Unknown proof format: {:?}", proof_format);
@@ -490,6 +525,7 @@ fn main() {
             proof_options,
         } => {
             let resolver = resolver_options.to_resolver();
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let presentation_reader = BufReader::new(stdin());
             let mut presentation: VerifiablePresentation =
                 serde_json::from_reader(presentation_reader).unwrap();
@@ -520,6 +556,7 @@ fn main() {
                             jwk_opt.as_ref(),
                             options,
                             &resolver,
+                            &mut context_loader,
                             ssh_agent_sock_opt,
                         ))
                         .unwrap();
@@ -538,6 +575,7 @@ fn main() {
             resolver_options,
         } => {
             let resolver = resolver_options.to_resolver();
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let mut presentation_reader = BufReader::new(stdin());
             let proof_format = proof_options.proof_format.clone();
             let options = LinkedDataProofOptions::from(proof_options);
@@ -549,13 +587,14 @@ fn main() {
                         &jwt,
                         Some(options),
                         &resolver,
+                        &mut context_loader,
                     ))
                 }
                 ProofFormat::LDP => {
                     let presentation: VerifiablePresentation =
                         serde_json::from_reader(presentation_reader).unwrap();
                     presentation.validate_unsigned().unwrap();
-                    rt.block_on(presentation.verify(Some(options), &resolver))
+                    rt.block_on(presentation.verify(Some(options), &resolver, &mut context_loader))
                 }
                 _ => {
                     panic!("Unexpected proof format: {:?}", proof_format);
@@ -670,6 +709,7 @@ fn main() {
             resolver_options,
         } => {
             let resolver = resolver_options.to_resolver();
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let mut presentation = VerifiablePresentation::default();
             presentation.holder = Some(ssi::vc::URI::String(holder));
             let proof_format = proof_options.proof_format.clone();
@@ -698,6 +738,7 @@ fn main() {
                             jwk_opt.as_ref(),
                             options,
                             &resolver,
+                            &mut context_loader,
                             ssh_agent_sock_opt,
                         ))
                         .unwrap();
