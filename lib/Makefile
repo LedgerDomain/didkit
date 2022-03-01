@@ -44,20 +44,8 @@ $(TARGET)/test/c.stamp: $(TARGET)/cabi-test $(TARGET)/release/$(LIB_NAME) | $(TA
 	LD_LIBRARY_PATH=$(TARGET)/release $(TARGET)/cabi-test
 	touch $@
 
-$(TARGET)/cabi-test: c/test.c $(TARGET)/release/libdidkit.so $(TARGET)/didkit.h
+$(TARGET)/cabi-test: c/test.c $(TARGET)/release/$(LIB_NAME) $(TARGET)/didkit.h
 	$(CC) -I$(TARGET) -L$(TARGET)/release $< -ldl -ldidkit -o $@
-
-## Python
-$(TARGET)/test/python.stamp: $(TARGET)/release/$(LIB_NAME) | $(TARGET)/test
-	rm -rf python/dist/*
-	python3 -m pip install --upgrade pip build
-	python3 -m build python/
-	touch $@
-
-.PHONY: install-python
-install-python: $(TARGET)/test/python.stamp
-	python3 -m pip install python/dist/didkit-*.whl
-	python3 -m unittest python/didkit/tests.py -v
 
 ## Java
 
@@ -128,7 +116,7 @@ IOS_LIBS=\
 $(TARGET)/test/ios.stamp: $(TARGET)/universal/release/libdidkit.a $(TARGET)/didkit.h | $(TARGET)/test
 	cd ios && \
 		xcodebuild test \
-			-destination platform="iOS Simulator,name=iPhone 12 Pro,OS=14.4" \
+			-destination platform="iOS Simulator,name=iPhone 12 Pro" \
 			-scheme DIDKitSwift
 	touch $@
 

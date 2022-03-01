@@ -18,6 +18,7 @@ path = "../"
 default-features = false
 features = ["wasm"]
 
+# TODO remove dependency on ssi
 [dependencies.ssi]
 path = "../../../ssi"
 default-features = false
@@ -31,6 +32,10 @@ features = ["secp256k1", "p256"]
 path = "../../../ssi/did-tezos"
 default-features = false
 features = ["secp256k1", "dalek", "p256"]
+
+[dependencies.did-webkey]
+path = "../../../ssi/did-webkey"
+default-features = false
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2"
