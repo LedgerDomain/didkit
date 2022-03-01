@@ -121,6 +121,7 @@ fn issue_credential(
     key_json_ptr: *const c_char,
 ) -> Result<*const c_char, Error> {
     let resolver = DID_METHODS.to_resolver();
+    let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
     let credential_json = unsafe { CStr::from_ptr(credential_json_ptr) }.to_str()?;
     let proof_options_json = unsafe { CStr::from_ptr(proof_options_json_ptr) }.to_str()?;
     let key_json = unsafe { CStr::from_ptr(key_json_ptr) }.to_str()?;
@@ -135,7 +136,7 @@ fn issue_credential(
         }
         ProofFormat::LDP => {
             let proof =
-                rt.block_on(credential.generate_proof(&key, &options.ldp_options, resolver))?;
+                rt.block_on(credential.generate_proof(&key, &options.ldp_options, resolver, &mut context_loader))?;
             credential.add_proof(proof);
             serde_json::to_string(&credential)?
         }
@@ -171,15 +172,17 @@ fn verify_credential(
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
     let resolver = DID_METHODS.to_resolver();
+    let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
     let result = match proof_format {
         ProofFormat::JWT => rt.block_on(VerifiableCredential::verify_jwt(
             &vc_str,
             Some(options.ldp_options),
             resolver,
+            &mut context_loader,
         )),
         ProofFormat::LDP => {
             let vc = VerifiableCredential::from_json_unsigned(vc_str)?;
-            rt.block_on(vc.verify(Some(options.ldp_options), resolver))
+            rt.block_on(vc.verify(Some(options.ldp_options), resolver, &mut context_loader))
         }
     };
     Ok(CString::new(serde_json::to_string(&result)?)?.into_raw())
@@ -221,8 +224,9 @@ fn issue_presentation(
             rt.block_on(presentation.generate_jwt(Some(&key), &options.ldp_options, resolver))?
         }
         ProofFormat::LDP => {
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let proof =
-                rt.block_on(presentation.generate_proof(&key, &options.ldp_options, resolver))?;
+                rt.block_on(presentation.generate_proof(&key, &options.ldp_options, resolver, &mut context_loader))?;
             presentation.add_proof(proof);
             serde_json::to_string(&presentation)?
         }
@@ -268,8 +272,9 @@ fn did_auth(
             rt.block_on(presentation.generate_jwt(Some(&key), &options.ldp_options, resolver))?
         }
         ProofFormat::LDP => {
+            let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
             let proof =
-                rt.block_on(presentation.generate_proof(&key, &options.ldp_options, resolver))?;
+                rt.block_on(presentation.generate_proof(&key, &options.ldp_options, resolver, &mut context_loader))?;
             presentation.add_proof(proof);
             serde_json::to_string(&presentation)?
         }
@@ -301,15 +306,17 @@ fn verify_presentation(
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
     let resolver = DID_METHODS.to_resolver();
+    let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
     let result = match proof_format {
         ProofFormat::JWT => rt.block_on(VerifiablePresentation::verify_jwt(
             &vp_str,
             Some(options.ldp_options),
             resolver,
+            &mut context_loader,
         )),
         ProofFormat::LDP => {
             let vp = VerifiablePresentation::from_json_unsigned(vp_str)?;
-            rt.block_on(vp.verify(Some(options.ldp_options), DID_METHODS.to_resolver()))
+            rt.block_on(vp.verify(Some(options.ldp_options), DID_METHODS.to_resolver(), &mut context_loader))
         }
     };
     Ok(CString::new(serde_json::to_string(&result)?)?.into_raw())
