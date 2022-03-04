@@ -16,4 +16,4 @@ default-members = [
 ]
 
 [patch.crates-io]
-ssi = { git = "https://github.com/LedgerDomain/ssi", branch = "with-oci-contexts" }
+ssi = { git = "https://github.com/LedgerDomain/ssi", branch = "with-oci-contexts-and-vp-jwt-timestamps" }
