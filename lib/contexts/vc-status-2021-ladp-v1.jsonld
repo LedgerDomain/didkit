@@ -1,0 +1,31 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "name": "https://schema.org/name",
+    "description": "https://schema.org/description",
+    "identifier": "https://schema.org/identifier",
+    "image": {
+      "@id": "https://schema.org/image",
+      "@type": "@id"
+    },
+    "id": "@id",
+    "type": "@type",
+    "RevocationStatus2021LDAP": {
+      "@id": "https://spherity.github.io/vc-status-2021-ldap#RevocationStatus2021LDAP",
+      "@context": {
+        "ssl": {
+          "@id": "https://spherity.github.io/vc-status-2021-ldap#ssl"
+        },
+        "host": {
+          "@id": "https://spherity.github.io/vc-status-2021-ldap#host"
+        },
+        "query": {
+          "@id": "https://spherity.github.io/vc-status-2021-ldap#query"
+        },
+        "params": {
+          "@id": "https://spherity.github.io/vc-status-2021-ldap#params"
+        }
+      }
+    }
+  }
+}

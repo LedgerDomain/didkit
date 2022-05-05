@@ -1,0 +1,93 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "name": "https://schema.org/name",
+    "description": "https://schema.org/description",
+    "identifier": "https://schema.org/identifier",
+    "image": {
+      "@id": "https://schema.org/image",
+      "@type": "@id"
+    },
+    "id": "@id",
+    "type": "@type",
+    "DSCSADispenserATPCredential": {
+      "@id": "https://open-credentialing-initiative.github.io/oci#DSCSADispenserATPCredential",
+      "@context": {
+        "legalName": {
+          "@id": "https://schema.org/name"
+        },
+        "address": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#PostalAddress"
+        },
+        "globalLocationNumber": {
+          "@id": "https://schema.org/globalLocationNumber"
+        }
+      }
+    },
+    "DSCSAManufacturerATPCredential": {
+      "@id": "https://open-credentialing-initiative.github.io/oci#DSCSAManufacturerATPCredential",
+      "@context": {
+        "legalName": {
+          "@id": "https://schema.org/name"
+        },
+        "address": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#PostalAddress"
+        },
+        "globalLocationNumber": {
+          "@id": "https://schema.org/globalLocationNumber"
+        }
+      }
+    },
+    "DSCSAWholesalerATPCredential": {
+      "@id": "https://open-credentialing-initiative.github.io/oci#DSCSAWholesalerATPCredential",
+      "@context": {
+        "legalName": {
+          "@id": "https://schema.org/name"
+        },
+        "address": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#PostalAddress"
+        },
+        "globalLocationNumber": {
+          "@id": "https://schema.org/globalLocationNumber"
+        }
+      }
+    },
+    "IdentityCredential": {
+      "@id": "https://open-credentialing-initiative.github.io/oci#IdentityCredential",
+      "@context": {
+        "parent": {
+          "@id": "https://schema.org/parentOrganization"
+        },
+        "legalName": {
+          "@id": "https://schema.org/name"
+        },
+        "address": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#PostalAddress"
+        },
+        "dueDiligenceSource": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#dueDiligenceSource"
+        },
+        "dueDiligenceSignature": {
+          "@id": "https://open-credentialing-initiative.github.io/oci#dueDiligenceSignature"
+        }
+      }
+    },
+    "PostalAddress": {
+      "@id": "https://open-credentialing-initiative.github.io/oci#PostalAddress",
+      "@context": {
+        "streetAddress": {
+          "@id": "https://schema.org/streetAddress"
+        },
+        "addressLocality": {
+          "@id": "https://schema.org/addressLocality"
+        },
+        "addressRegion": {
+          "@id": "https://schema.org/addressRegion"
+        },
+        "postalCode": {
+          "@id": "https://schema.org/postalCode"
+        }
+      }
+    }
+  }
+}

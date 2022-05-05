@@ -387,6 +387,9 @@ fn main() {
         pub const OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT: &str = "https://open-credentialing-initiative.github.io/oci/contexts/oci-v1.jsonld";
         pub const OPEN_CREDENTIALING_INITIATIVE_V1: &str = include_str!("../contexts/oci-v1.jsonld");
 
+        pub const OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD: &str = "https://open-credentialing-initiative.github.io/oci/contexts/oci-v1.jsonld";
+        pub const OPEN_CREDENTIALING_INITIATIVE_V1_OLD: &str = include_str!("../contexts/oci-v1.jsonld");
+
         // Pre-downloaded and included in the binary.
         pub const VC_STATUS_2021_LDAP_V1_CONTEXT: &str = "https://spherity.github.io/vc-status-2021-ldap/contexts/vc-status-2021-ldap/v1.jsonld";
         pub const VC_STATUS_2021_LDAP_V1: &str = include_str!("../contexts/vc-status-2021-ladp-v1.jsonld");
@@ -398,6 +401,15 @@ fn main() {
                 let jsonld = OPEN_CREDENTIALING_INITIATIVE_V1;
                 let doc = json::parse(jsonld).unwrap();
                 let iri = iref::Iri::new(OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT).unwrap();
+                json_ld::RemoteDocument::new(doc, iri)
+            },
+        );
+        context_map.insert(
+            OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD.to_string(),
+            {
+                let jsonld = OPEN_CREDENTIALING_INITIATIVE_V1_OLD;
+                let doc = json::parse(jsonld).unwrap();
+                let iri = iref::Iri::new(OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD).unwrap();
                 json_ld::RemoteDocument::new(doc, iri)
             },
         );

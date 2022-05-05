@@ -38,6 +38,48 @@ fn ccchar_or_error(result: Result<*const c_char, Error>) -> *const c_char {
     }
 }
 
+async fn inject_oci_contexts() {
+    // Pre-downloaded and included in the binary.
+    pub const OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT: &str = "https://open-credentialing-initiative.github.io/schemas/credentials/DSCSAATPCredential-v1.0.0.jsonld";
+    pub const OPEN_CREDENTIALING_INITIATIVE_V1: &str = include_str!("../contexts/DSCSAATPCredential-v1.0.0.jsonld");
+
+    pub const OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD: &str = "https://open-credentialing-initiative.github.io/oci/contexts/oci-v1.jsonld";
+    pub const OPEN_CREDENTIALING_INITIATIVE_V1_OLD: &str = include_str!("../contexts/oci-v1.jsonld");
+
+    // Pre-downloaded and included in the binary.
+    pub const VC_STATUS_2021_LDAP_V1_CONTEXT: &str = "https://spherity.github.io/vc-status-2021-ldap/contexts/vc-status-2021-ldap/v1.jsonld";
+    pub const VC_STATUS_2021_LDAP_V1: &str = include_str!("../contexts/vc-status-2021-ladp-v1.jsonld");
+
+    let mut context_map = ssi::jsonld::CONTEXT_MAP.write().await;
+    context_map.insert(
+        OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT.to_string(),
+        {
+            let jsonld = OPEN_CREDENTIALING_INITIATIVE_V1;
+            let doc = json::parse(jsonld).unwrap();
+            let iri = iref::Iri::new(OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT).unwrap();
+            json_ld::RemoteDocument::new(doc, iri)
+        },
+    );
+    context_map.insert(
+        OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD.to_string(),
+        {
+            let jsonld = OPEN_CREDENTIALING_INITIATIVE_V1_OLD;
+            let doc = json::parse(jsonld).unwrap();
+            let iri = iref::Iri::new(OPEN_CREDENTIALING_INITIATIVE_V1_CONTEXT_OLD).unwrap();
+            json_ld::RemoteDocument::new(doc, iri)
+        },
+    );
+    context_map.insert(
+        VC_STATUS_2021_LDAP_V1_CONTEXT.to_string(),
+        {
+            let jsonld = VC_STATUS_2021_LDAP_V1;
+            let doc = json::parse(jsonld).unwrap();
+            let iri = iref::Iri::new(VC_STATUS_2021_LDAP_V1_CONTEXT).unwrap();
+            json_ld::RemoteDocument::new(doc, iri)
+        },
+    );
+}
+
 // TODO: instead of having two of each function, make a procedural macro to wrap each function.  Or
 // implement std::ops::Try (nightly).
 
@@ -97,6 +139,7 @@ fn key_to_verification_method(
         .ok_or(Error::UnableToGenerateDID)?;
     let did_resolver = did_method.to_resolver();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let vm = rt
         .block_on(get_verification_method(&did, did_resolver))
         .ok_or(Error::UnableToGetVerificationMethod)?;
@@ -130,6 +173,7 @@ fn issue_credential(
     let options: JWTOrLDPOptions = serde_json::from_str(proof_options_json)?;
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let out = match proof_format {
         ProofFormat::JWT => {
             rt.block_on(credential.generate_jwt(Some(&key), &options.ldp_options, resolver))?
@@ -171,6 +215,7 @@ fn verify_credential(
     let options: JWTOrLDPOptions = serde_json::from_str(proof_options_json)?;
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let resolver = DID_METHODS.to_resolver();
     let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
     let result = match proof_format {
@@ -219,6 +264,7 @@ fn issue_presentation(
     let options: JWTOrLDPOptions = serde_json::from_str(proof_options_json)?;
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let out = match proof_format {
         ProofFormat::JWT => {
             rt.block_on(presentation.generate_jwt(Some(&key), &options.ldp_options, resolver))?
@@ -267,6 +313,7 @@ fn did_auth(
     let options: JWTOrLDPOptions = serde_json::from_str(proof_options_json)?;
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let out = match proof_format {
         ProofFormat::JWT => {
             rt.block_on(presentation.generate_jwt(Some(&key), &options.ldp_options, resolver))?
@@ -305,6 +352,7 @@ fn verify_presentation(
     let options: JWTOrLDPOptions = serde_json::from_str(proof_options_json)?;
     let proof_format = options.proof_format.unwrap_or_default();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let resolver = DID_METHODS.to_resolver();
     let mut context_loader = ssi::jsonld::CONTEXT_LOADER.clone();
     let result = match proof_format {
@@ -352,6 +400,7 @@ fn resolve_did(
     let input_metadata: ResolutionInputMetadata = serde_json::from_str(input_metadata_json)?;
     let resolver = DID_METHODS.to_resolver();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let (res_meta, doc_opt, doc_meta_opt) = rt.block_on(resolver.resolve(did, &input_metadata));
     let result = ResolutionResult {
         did_document: doc_opt,
@@ -389,6 +438,7 @@ fn dereference_did_url(
     let input_metadata: DereferencingInputMetadata = serde_json::from_str(input_metadata_json)?;
     let resolver = DID_METHODS.to_resolver();
     let rt = runtime::get()?;
+    rt.block_on(inject_oci_contexts());
     let deref_result = rt.block_on(dereference(resolver, did_url, &input_metadata));
     use serde_json::json;
     let result = json!(deref_result);
