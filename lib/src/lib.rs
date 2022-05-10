@@ -26,6 +26,7 @@ pub use ssi::did_resolve::{
     SeriesResolver,
 };
 pub use ssi::jwk::JWK;
+pub use ssi::jsonld::ContextLoader;
 pub use ssi::ldp::resolve_key;
 pub use ssi::ldp::ProofPreparation;
 pub use ssi::tzkey::jwk_from_tezos_key;
@@ -126,6 +127,7 @@ pub async fn generate_proof(
     key: Option<&JWK>,
     options: LinkedDataProofOptions,
     resolver: &dyn DIDResolver,
+    context_loader: &mut ContextLoader,
     ssh_agent_sock_path_opt: Option<&str>,
 ) -> Result<ssi::vc::Proof, GenerateProofError> {
     use ssi::ldp::LinkedDataProofs;
@@ -142,12 +144,12 @@ pub async fn generate_proof(
         Some(sock_path) => {
             use tokio::net::UnixStream;
             let mut ssh_agent_sock = UnixStream::connect(sock_path).await?;
-            crate::ssh_agent::generate_proof(&mut ssh_agent_sock, document, options, resolver, key)
+            crate::ssh_agent::generate_proof(&mut ssh_agent_sock, document, options, resolver, context_loader, key)
                 .await?
         }
         None => {
             let jwk = key.expect("JWK, Key Path, or SSH Agent option is required.");
-            LinkedDataProofs::sign(document, &options, resolver, &jwk, None).await?
+            LinkedDataProofs::sign(document, &options, resolver, context_loader, &jwk, None).await?
         }
     };
 

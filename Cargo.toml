@@ -14,3 +14,7 @@ default-members = [
   "lib",
   "lib/cbindings",
 ]
+
+[patch.crates-io]
+#ssi = { path = "../ssi" }
+ssi = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
