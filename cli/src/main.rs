@@ -20,7 +20,7 @@ use didkit::{
     ResolutionResult, Source, VerifiableCredential, VerifiablePresentation, DIDURL, DID_METHODS,
     JWK, URI,
 };
-use didkit_cli::opts::ResolverOptions;
+use didkit_cli::opts::{ContextLoaderOptions, ResolverOptions};
 use ssi::did::{DIDMethodTransaction, Service, ServiceEndpoint, VerificationRelationship};
 use ssi::one_or_many::OneOrMany;
 
@@ -189,6 +189,8 @@ pub enum DIDKit {
         proof_options: ProofOptions,
         #[clap(flatten)]
         resolver_options: ResolverOptions,
+        #[clap(flatten)]
+        context_loader_options: ContextLoaderOptions,
     },
 
     /// Deactivate a DID.
@@ -217,6 +219,8 @@ pub enum DIDKit {
         proof_options: ProofOptions,
         #[clap(flatten)]
         resolver_options: ResolverOptions,
+        #[clap(flatten)]
+        context_loader_options: ContextLoaderOptions,
     },
     /// Verify Credential
     VCVerifyCredential {
@@ -224,6 +228,8 @@ pub enum DIDKit {
         proof_options: ProofOptions,
         #[clap(flatten)]
         resolver_options: ResolverOptions,
+        #[clap(flatten)]
+        context_loader_options: ContextLoaderOptions,
     },
     /// Issue Presentation
     VCIssuePresentation {
@@ -233,6 +239,8 @@ pub enum DIDKit {
         proof_options: ProofOptions,
         #[clap(flatten)]
         resolver_options: ResolverOptions,
+        #[clap(flatten)]
+        context_loader_options: ContextLoaderOptions,
     },
     /// Verify Presentation
     VCVerifyPresentation {
@@ -240,6 +248,8 @@ pub enum DIDKit {
         resolver_options: ResolverOptions,
         #[clap(flatten)]
         proof_options: ProofOptions,
+        #[clap(flatten)]
+        context_loader_options: ContextLoaderOptions,
     },
     /// Convert JSON-LD to URDNA2015-canonicalized RDF N-Quads
     ToRdfURDNA2015 {
@@ -801,11 +811,11 @@ fn main() -> AResult<()> {
         DIDKit::VCIssueCredential {
             key,
             resolver_options,
+            context_loader_options,
             proof_options,
         } => {
             let resolver = resolver_options.to_resolver();
-            // TODO: Figure out how to pass ContextLoader into this function
-            let mut context_loader = ssi::jsonld::ContextLoader::default();
+            let mut context_loader = context_loader_options.to_context_loader();
             let credential_reader = BufReader::new(stdin());
             let mut credential: VerifiableCredential =
                 serde_json::from_reader(credential_reader).unwrap();
@@ -852,10 +862,10 @@ fn main() -> AResult<()> {
         DIDKit::VCVerifyCredential {
             proof_options,
             resolver_options,
+            context_loader_options,
         } => {
             let resolver = resolver_options.to_resolver();
-            // TODO: Figure out how to pass ContextLoader into this function
-            let mut context_loader = ssi::jsonld::ContextLoader::default();
+            let mut context_loader = context_loader_options.to_context_loader();
             let mut credential_reader = BufReader::new(stdin());
             let proof_format = proof_options.proof_format.clone();
             let options = LinkedDataProofOptions::from(proof_options);
@@ -891,11 +901,11 @@ fn main() -> AResult<()> {
         DIDKit::VCIssuePresentation {
             key,
             resolver_options,
+            context_loader_options,
             proof_options,
         } => {
             let resolver = resolver_options.to_resolver();
-            // TODO: Figure out how to pass ContextLoader into this function
-            let mut context_loader = ssi::jsonld::ContextLoader::default();
+            let mut context_loader = context_loader_options.to_context_loader();
             let presentation_reader = BufReader::new(stdin());
             let mut presentation: VerifiablePresentation =
                 serde_json::from_reader(presentation_reader).unwrap();
@@ -943,10 +953,10 @@ fn main() -> AResult<()> {
         DIDKit::VCVerifyPresentation {
             proof_options,
             resolver_options,
+            context_loader_options,
         } => {
             let resolver = resolver_options.to_resolver();
-            // TODO: Figure out how to pass ContextLoader into this function
-            let mut context_loader = ssi::jsonld::ContextLoader::default();
+            let mut context_loader = context_loader_options.to_context_loader();
             let mut presentation_reader = BufReader::new(stdin());
             let proof_format = proof_options.proof_format.clone();
             let options = LinkedDataProofOptions::from(proof_options);
@@ -1307,10 +1317,10 @@ fn main() -> AResult<()> {
             holder,
             proof_options,
             resolver_options,
+            context_loader_options,
         } => {
             let resolver = resolver_options.to_resolver();
-            // TODO: Figure out how to pass ContextLoader into this function
-            let mut context_loader = ssi::jsonld::ContextLoader::default();
+            let mut context_loader = context_loader_options.to_context_loader();
             let mut presentation = VerifiablePresentation::default();
             presentation.holder = Some(ssi::vc::URI::String(holder));
             let proof_format = proof_options.proof_format.clone();
