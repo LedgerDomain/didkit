@@ -1,8 +1,7 @@
-use async_std::sync::RwLock;
 use clap::StructOpt;
 use didkit::{Error, HTTPDIDResolver, SeriesResolver, DID_METHODS};
 use ssi::jsonld::ContextLoader;
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 #[derive(StructOpt, Debug, Clone, Default)]
 pub struct ResolverOptions {
@@ -37,7 +36,7 @@ pub struct ContextLoaderOptions {
     #[clap(env, long)]
     /// Specifies additional JSONLD context objects to be used during JSONLD context resolution
     /// for signing and verification.  If specified, it should have the form
-    /// `[{"iri": "...", "docBodyFilePath": "..."}, {"iri": "...", "docBodyFilePath": "..."}, ...]`
+    /// `[{"url": "...", "docBodyFilePath": "..."}, {"url": "...", "docBodyFilePath": "..."}, ...]`
     pub additional_contexts: Option<AdditionalContexts>,
 }
 
@@ -49,21 +48,19 @@ impl ContextLoaderOptions {
             ContextLoader::default()
         };
 
-        let context_loader = match &self.additional_contexts {
+        let context_loader = match self.additional_contexts.as_ref() {
             Some(additional_contexts) => {
-                let mut context_map = HashMap::new();
+                let mut preparsed_context_map = HashMap::new();
                 for context_loader_entry in additional_contexts.0.iter() {
-                    // Parse the IRI
-                    let iri =
-                        iref::Iri::new(&context_loader_entry.iri)
-                            .or_else(|e| Err(Error::InvalidContextLoaderEntry(
-                                format!(
-                                    "invalid IRI: {:?}; error was {}",
-                                    context_loader_entry.iri,
-                                    e
-                                )
-                            ))).unwrap();
-                    // Parse the document
+                    // Check for collision
+                    if preparsed_context_map.contains_key(&context_loader_entry.url) {
+                        let r: Result<(), Error> =
+                            Err(Error::InvalidContextLoaderEntry(
+                                format!("Collision in additional-contexts URL: {}", context_loader_entry.url)
+                            ));
+                        r.unwrap();
+                    }
+                    // Read the doc body from file.
                     let doc_body =
                         std::fs::read_to_string(&context_loader_entry.doc_body_file_path)
                             .or_else(|e| Err(Error::InvalidContextLoaderEntry(
@@ -73,18 +70,13 @@ impl ContextLoaderOptions {
                                     e
                                 )
                             ))).unwrap();
-                    let doc =
-                        json::parse(&doc_body)
-                            .or_else(|e| Err(Error::InvalidContextLoaderEntry(
-                                format!(
-                                    "invalid JSONLD context doc body at path: {:?}; error was {}",
-                                    context_loader_entry.doc_body_file_path,
-                                    e
-                                )
-                            ))).unwrap();
-                    context_map.insert(context_loader_entry.iri.clone(), json_ld::RemoteDocument::new(doc, iri));
+                    preparsed_context_map.insert(context_loader_entry.url.clone(), doc_body);
                 }
-                context_loader.with_context_map(Arc::new(RwLock::new(context_map)))
+                context_loader
+                    .with_context_map_from(preparsed_context_map)
+                    .or_else(|e| Err(Error::InvalidContextLoaderEntry(
+                        format!("error while initializing ContextLoader; error was {}", e)
+                    ))).unwrap()
             }
             None => context_loader,
         };
@@ -96,7 +88,7 @@ impl ContextLoaderOptions {
 #[derive(Clone, Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContextLoaderEntry {
-    pub iri: String,
+    pub url: String,
     pub doc_body_file_path: String,
 }
 

@@ -14,16 +14,3 @@ default-members = [
   "lib",
   "lib/cbindings",
 ]
-
-[patch.crates-io]
-did-ion = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-ethr = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-method-key = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-onion = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-pkh = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-sol = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-tz = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-web = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-did-webkey = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-ssi-did-test = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
-ssi = { git = "https://github.com/LedgerDomain/ssi", rev = "949b2698d7aacd42ad62f3ea84deb8236819cb42" }
