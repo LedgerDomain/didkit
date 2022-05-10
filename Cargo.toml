@@ -16,5 +16,14 @@ default-members = [
 ]
 
 [patch.crates-io]
-#ssi = { path = "../ssi" }
+did-ion = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-ethr = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-method-key = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-onion = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-pkh = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-sol = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-tz = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-web = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+did-webkey = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
+ssi-did-test = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
 ssi = { git = "https://github.com/LedgerDomain/ssi", branch = "feature-context-loader" }
